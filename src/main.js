@@ -1,6 +1,7 @@
-import { Application, Assets, Sprite, Rectangle, Graphics  } from "pixi.js";
+import { Application, Assets, Sprite, Rectangle } from "pixi.js";
 import ToolsManager from "./managers/ToolsManager.js";
 import InputManager from "./managers/InputManager.js";
+import DrawManager from "./managers/DrawManager.js";
 
 import "../style.css";
 import "@fortawesome/fontawesome-free/css/all.min.css";
@@ -17,36 +18,23 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
         resizeTo: container
     });
 
-    inputManager.initialize(app);
+    InputManager.initialize(app);
+    DrawManager.initialize(app);
 
     ToolsManager.addToolGroup("Shapes",["fa-solid","fa-shapes"], [
         ToolsManager.getTool("Ellipse",["fa-regular","fa-circle"], () => {
-            const obj = new Graphics()
-                .circle(0, 0, 100) // Create a circle with radius 100
-                .fill('red'); // Fill the circle with a red color
-            app.stage.addChild(obj); // Add the circle to the stage  
+            DrawManager.selectCircle();
         }),
         ToolsManager.getTool("Rectangle",["fa-regular","fa-square"], () => {
-            const obj = new Graphics()
-                .rect(0, 0, 200, 100) // Create a rectangle with dimensions 200x100
-                .fill('red'); // Fill the rectangle with a red color
-            app.stage.addChild(obj); // Add the rectangle to the stage
+            DrawManager.selectRectangle();
             
         }),
         ToolsManager.getTool("Line",["fa-solid","fa-lines-leaning"], () => {
-            const obj = new Graphics()
-                .lineStyle(5, 0xFF0000) // Set line style with width 5 and red color
-                .moveTo(0, 0) // Move to starting point
-                .lineTo(200, 100);
-            app.stage.addChild(obj); // Add the line to the stage
+            DrawManager.selectLine();
 
         }),
         ToolsManager.getTool("Star",["fa-regular","fa-star"], () => {
-            const obj = new Graphics()
-                .beginFill(0xFFFF00) // Start filling with yellow color
-                .drawStar(0, 0, 5, 100) // Draw a star with 5 points and radius 100
-                .endFill();
-            app.stage.addChild(obj); // Add the star to the stage
+            DrawManager.selectStar();
 
         })
     ]);
