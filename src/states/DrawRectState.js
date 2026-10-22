@@ -1,4 +1,6 @@
 import { Graphics } from "pixi.js";
+import { constrainToSquare } from "./ShapeConstraints.js";
+import BackgroundTexture from "../managers/BackgroundTexture.js";
 
 class DrawRectState {
 
@@ -22,8 +24,14 @@ class DrawRectState {
     onPointerMove(position) {
         // TODO: Update the rectangle while the pointer is down.
         if (this.isDrawing) {
-            this.lastX = position.x;
-            this.lastY = position.y;
+            const endPosition = position.shiftKey
+                ? constrainToSquare(
+                    { x: this.firstX, y: this.firstY },
+                    position
+                )
+                : position;
+            this.lastX = endPosition.x;
+            this.lastY = endPosition.y;
         }
     }
 
@@ -33,21 +41,36 @@ class DrawRectState {
             return;
         }
 
-        this.lastX = position.x;
-        this.lastY = position.y;
+        const endPosition = position.shiftKey
+            ? constrainToSquare(
+                { x: this.firstX, y: this.firstY },
+                position
+            )
+            : position;
+        this.lastX = endPosition.x;
+        this.lastY = endPosition.y;
         this.isDrawing = false;
 
-        const rectangle = new Graphics()
-            .rect(
-                Math.min(this.firstX, this.lastX),
-                Math.min(this.firstY, this.lastY),
-                Math.abs(this.lastX - this.firstX),
-                Math.abs(this.lastY - this.firstY)
-            )
-            .fill({ color: 0x000000, alpha: 0.5 })
+        const x = Math.min(this.firstX, this.lastX);
+        const y = Math.min(this.firstY, this.lastY);
+        const width = Math.abs(this.lastX - this.firstX);
+        const height = Math.abs(this.lastY - this.firstY);
+        const fill = new Graphics()
+            .rect(x, y, width, height)
+            .fill({ color: 0x000000, alpha: 0.5 });
+        const mask = new Graphics()
+            .rect(x, y, width, height)
+            .fill({ color: 0xffffff });
+        const outline = new Graphics()
+            .rect(x, y, width, height)
             .stroke({ color: 0x000000, width: 2 });
 
-        this.stage.addChild(rectangle);
+        BackgroundTexture.addToShape(this.stage, {
+            fill,
+            mask,
+            outline,
+            bounds: { x, y, width, height }
+        });
     }
 }
 

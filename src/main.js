@@ -2,6 +2,7 @@ import { Application, Assets, Sprite, Rectangle } from "pixi.js";
 import ToolsManager from "./managers/ToolsManager.js";
 import InputManager from "./managers/InputManager.js";
 import DrawManager from "./managers/DrawManager.js";
+import BackgroundTexture from "./managers/BackgroundTexture.js";
 
 import "../style.css";
 import "@fortawesome/fontawesome-free/css/all.min.css";
@@ -18,6 +19,7 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
         resizeTo: container
     });
 
+    await BackgroundTexture.initialize();
     InputManager.initialize(app);
     DrawManager.initialize(app);
 

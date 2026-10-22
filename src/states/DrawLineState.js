@@ -1,4 +1,5 @@
 import { Graphics } from "pixi.js";
+import { constrainLineAngle } from "./ShapeConstraints.js";
 
 class DrawLineState {
 
@@ -22,8 +23,14 @@ class DrawLineState {
     onPointerMove(position) {
         // TODO: Update the line endpoint while the pointer is down.
         if (this.isDrawing) {
-            this.lastX = position.x;
-            this.lastY = position.y;
+            const endPosition = position.shiftKey
+                ? constrainLineAngle(
+                    { x: this.firstX, y: this.firstY },
+                    position
+                )
+                : position;
+            this.lastX = endPosition.x;
+            this.lastY = endPosition.y;
         }
     }
 
@@ -33,8 +40,14 @@ class DrawLineState {
             return;
         }
 
-        this.lastX = position.x;
-        this.lastY = position.y;
+        const endPosition = position.shiftKey
+            ? constrainLineAngle(
+                { x: this.firstX, y: this.firstY },
+                position
+            )
+            : position;
+        this.lastX = endPosition.x;
+        this.lastY = endPosition.y;
         this.isDrawing = false;
 
         const line = new Graphics()

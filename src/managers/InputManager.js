@@ -57,15 +57,19 @@ class InputManager {
     }
 
     onPointerMove(event) {
-        // json (better than xml)
         this.PointerMoveEvent.invoke({
-            x:event.global.x,y:
-            event.global.y
+            x: event.global.x,
+            y: event.global.y,
+            shiftKey: event.shiftKey
         });
     }
 
     onPointerUp(event) {
-        this.PointerUpEvent.invoke({x:event.global.x,y:event.global.y});
+        this.PointerUpEvent.invoke({
+            x: event.global.x,
+            y: event.global.y,
+            shiftKey: event.shiftKey
+        });
     }
     
     getIsMouseDown() {

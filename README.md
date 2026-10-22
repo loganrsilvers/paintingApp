@@ -33,3 +33,11 @@ json - sender:tove
         - the outer radius is the distance from the center to the tip (onPointerMove)
         - the inner radius is the distance from the center to the little divots between the tips. 
             - /// smaller inner radius = deeper divots (currently set 0.45)
+
+#### week 1 feedback:
+- "" maybe even put in a hotkey to hold shift that will force a perfectly scaled 1:1 length width shape instead of distorted
+- "" manipulate the scale. star.scale.x star.scale.y or star.scale.set(x,y) so its not the same proportions every time
+- maybe add patterns..?
+
+### updates from feedback:: 
+![week1.1 screenshot](readmeIMGs/week1-1.png)

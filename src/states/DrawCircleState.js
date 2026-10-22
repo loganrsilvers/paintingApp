@@ -1,4 +1,6 @@
 import { Graphics } from "pixi.js";
+import { constrainToSquare } from "./ShapeConstraints.js";
+import BackgroundTexture from "../managers/BackgroundTexture.js";
 
 class DrawCircleState {
 
@@ -24,8 +26,14 @@ class DrawCircleState {
     onPointerMove(position) {
         // TODO: Update the circle while the pointer is down.
         if (this.isDrawing) {
-            this.lastX = position.x;
-            this.lastY = position.y;
+            const endPosition = position.shiftKey
+                ? constrainToSquare(
+                    { x: this.firstX, y: this.firstY },
+                    position
+                )
+                : position;
+            this.lastX = endPosition.x;
+            this.lastY = endPosition.y;
         }
     }
 
@@ -35,8 +43,14 @@ class DrawCircleState {
             return;
         }
 
-        this.lastX = position.x;
-        this.lastY = position.y;
+        const endPosition = position.shiftKey
+            ? constrainToSquare(
+                { x: this.firstX, y: this.firstY },
+                position
+            )
+            : position;
+        this.lastX = endPosition.x;
+        this.lastY = endPosition.y;
         this.isDrawing = false;
 
         const radiusX = Math.abs(this.lastX - this.firstX) / 2;
@@ -44,12 +58,28 @@ class DrawCircleState {
         const centerX = (this.firstX + this.lastX) / 2;
         const centerY = (this.firstY + this.lastY) / 2;
 
-        const ellipse = new Graphics()
+        const bounds = {
+            x: centerX - radiusX,
+            y: centerY - radiusY,
+            width: radiusX * 2,
+            height: radiusY * 2
+        };
+        const fill = new Graphics()
             .ellipse(centerX, centerY, radiusX, radiusY)
-            .fill({ color: 0x000000, alpha: 0.5 })
+            .fill({ color: 0x000000, alpha: 0.5 });
+        const mask = new Graphics()
+            .ellipse(centerX, centerY, radiusX, radiusY)
+            .fill({ color: 0xffffff });
+        const outline = new Graphics()
+            .ellipse(centerX, centerY, radiusX, radiusY)
             .stroke({ color: 0x000000, width: 2 });
 
-        this.stage.addChild(ellipse);
+        BackgroundTexture.addToShape(this.stage, {
+            fill,
+            mask,
+            outline,
+            bounds
+        });
     }
 }
 
