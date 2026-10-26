@@ -3,6 +3,7 @@ import ToolsManager from "./managers/ToolsManager.js";
 import InputManager from "./managers/InputManager.js";
 import DrawManager from "./managers/DrawManager.js";
 import BackgroundTexture from "./managers/BackgroundTexture.js";
+import HistoryManager from "./managers/HistoryManager.js";
 
 import "../style.css";
 import "@fortawesome/fontawesome-free/css/all.min.css";
@@ -78,11 +79,11 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
     let redoBtn = document.getElementById("redo");
         
     undoBtn.addEventListener("click",() => {
-
+        HistoryManager.undo();
     });
     
     redoBtn.addEventListener("click",() => {
-
+        HistoryManager.redo();
     });
     
     

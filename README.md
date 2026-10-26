@@ -83,3 +83,12 @@ json - sender:tove
 - export/print/share screen/canvas 
 - duplicate feature
 - keyboard shortcuts (ctrl z, ctrl shift z/ ctrl y, ctrl c + v, ctrl x, ctrl d, ctrl p, backspace)
+
+## week 2: takeaways:
+- added actions/ folder
+- changed the states to execute actions (((EX:
+HistoryManager.execute(
+            new DrawRectAction()
+))))
+- speaking of, added historyManager - has history and undoStack with undo/redo/execute same as the shapeActions. 
+- updated main.js to include HistoryManager.undo + .redo

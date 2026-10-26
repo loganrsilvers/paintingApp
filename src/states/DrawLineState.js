@@ -1,5 +1,6 @@
-import { Graphics } from "pixi.js";
 import { constrainLineAngle } from "./ShapeConstraints.js";
+import DrawLineAction from "../actions/DrawLineAction.js";
+import HistoryManager from "../managers/HistoryManager.js";
 
 class DrawLineState {
 
@@ -50,12 +51,13 @@ class DrawLineState {
         this.lastY = endPosition.y;
         this.isDrawing = false;
 
-        const line = new Graphics()
-            .moveTo(this.firstX, this.firstY)
-            .lineTo(this.lastX, this.lastY)
-            .stroke({ color: 0x000000, width: 2 });
-
-        this.stage.addChild(line);
+        HistoryManager.execute(
+            new DrawLineAction(
+                this.stage,
+                { x: this.firstX, y: this.firstY },
+                { x: this.lastX, y: this.lastY }
+            )
+        );
     }
 }
 

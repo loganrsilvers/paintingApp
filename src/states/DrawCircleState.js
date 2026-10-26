@@ -1,6 +1,6 @@
-import { Graphics } from "pixi.js";
 import { constrainToSquare } from "./ShapeConstraints.js";
-import BackgroundTexture from "../managers/BackgroundTexture.js";
+import DrawCircleAction from "../actions/DrawCircleAction.js";
+import HistoryManager from "../managers/HistoryManager.js";
 
 class DrawCircleState {
 
@@ -53,33 +53,13 @@ class DrawCircleState {
         this.lastY = endPosition.y;
         this.isDrawing = false;
 
-        const radiusX = Math.abs(this.lastX - this.firstX) / 2;
-        const radiusY = Math.abs(this.lastY - this.firstY) / 2;
-        const centerX = (this.firstX + this.lastX) / 2;
-        const centerY = (this.firstY + this.lastY) / 2;
-
-        const bounds = {
-            x: centerX - radiusX,
-            y: centerY - radiusY,
-            width: radiusX * 2,
-            height: radiusY * 2
-        };
-        const fill = new Graphics()
-            .ellipse(centerX, centerY, radiusX, radiusY)
-            .fill({ color: 0x000000, alpha: 0.5 });
-        const mask = new Graphics()
-            .ellipse(centerX, centerY, radiusX, radiusY)
-            .fill({ color: 0xffffff });
-        const outline = new Graphics()
-            .ellipse(centerX, centerY, radiusX, radiusY)
-            .stroke({ color: 0x000000, width: 2 });
-
-        BackgroundTexture.addToShape(this.stage, {
-            fill,
-            mask,
-            outline,
-            bounds
-        });
+        HistoryManager.execute(
+            new DrawCircleAction(
+                this.stage,
+                { x: this.firstX, y: this.firstY },
+                { x: this.lastX, y: this.lastY }
+            )
+        );
     }
 }
 

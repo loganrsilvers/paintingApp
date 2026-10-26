@@ -1,6 +1,6 @@
-import { Graphics } from "pixi.js";
 import { constrainToSquare } from "./ShapeConstraints.js";
-import BackgroundTexture from "../managers/BackgroundTexture.js";
+import DrawStarAction from "../actions/DrawStarAction.js";
+import HistoryManager from "../managers/HistoryManager.js";
 
 class DrawStarState {
 
@@ -48,43 +48,13 @@ class DrawStarState {
         this.lastY = endPosition.y;
         this.isDrawing = false;
 
-        const centerX = (this.firstX + this.lastX) / 2;
-        const centerY = (this.firstY + this.lastY) / 2;
-        const radiusX = Math.abs(this.lastX - this.firstX) / 2;
-        const radiusY = Math.abs(this.lastY - this.firstY) / 2;
-        const points = [];
-
-        for (let i = 0; i < 10; i++) {
-            const angle = (i * Math.PI) / 5 - Math.PI / 2;
-            const radius = i % 2 === 0 ? 1 : 0.45;
-            points.push(
-                centerX + Math.cos(angle) * radiusX * radius,
-                centerY + Math.sin(angle) * radiusY * radius
-            );
-        }
-
-        const bounds = {
-            x: centerX - radiusX,
-            y: centerY - radiusY,
-            width: radiusX * 2,
-            height: radiusY * 2
-        };
-        const fill = new Graphics()
-            .poly(points, true)
-            .fill({ color: 0x000000, alpha: 0.5 });
-        const mask = new Graphics()
-            .poly(points, true)
-            .fill({ color: 0xffffff });
-        const outline = new Graphics()
-            .poly(points, true)
-            .stroke({ color: 0x000000, width: 2 });
-
-        BackgroundTexture.addToShape(this.stage, {
-            fill,
-            mask,
-            outline,
-            bounds
-        });
+        HistoryManager.execute(
+            new DrawStarAction(
+                this.stage,
+                { x: this.firstX, y: this.firstY },
+                { x: this.lastX, y: this.lastY }
+            )
+        );
     }
 
 }

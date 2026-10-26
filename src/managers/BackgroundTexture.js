@@ -47,6 +47,7 @@ class BackgroundTexture {
 
         shape.addChild(fill, mask, overlay, outline);
         stage.addChild(shape);
+        return shape;
     }
 }
 
