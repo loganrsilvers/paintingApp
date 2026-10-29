@@ -10,8 +10,9 @@ class DrawLineState {
     lastY = null;
     isDrawing = false;
 
-    constructor(stage) {
+    constructor(stage, colorState) {
         this.stage = stage;
+        this.colorState = colorState;
     }
 
     onPointerDown(position) {
@@ -55,7 +56,9 @@ class DrawLineState {
             new DrawLineAction(
                 this.stage,
                 { x: this.firstX, y: this.firstY },
-                { x: this.lastX, y: this.lastY }
+                { x: this.lastX, y: this.lastY },
+                this.colorState.strokeColor,
+                this.colorState.strokeWidth
             )
         );
     }

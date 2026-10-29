@@ -9,6 +9,7 @@ class HistoryManager {
         this.#validateAction(action);
         action.execute();
         this.history.push(action);
+        this.undoStack = [];
     }
 
     undo() {

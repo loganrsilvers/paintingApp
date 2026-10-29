@@ -2,10 +2,20 @@ import { Graphics } from "pixi.js";
 import BackgroundTexture from "../managers/BackgroundTexture.js";
 
 class DrawCircleAction {
-    constructor(stage, start, end) {
+    constructor(
+        stage,
+        start,
+        end,
+        fillColor = "#000000",
+        strokeColor = "#000000",
+        strokeWidth = 2
+    ) {
         this.stage = stage;
         this.start = start;
         this.end = end;
+        this.fillColor = fillColor;
+        this.strokeColor = strokeColor;
+        this.strokeWidth = strokeWidth;
         this.shape = null;
     }
 
@@ -27,13 +37,16 @@ class DrawCircleAction {
         };
         const fill = new Graphics()
             .ellipse(centerX, centerY, radiusX, radiusY)
-            .fill({ color: 0x000000, alpha: 0.5 });
+            .fill({ color: Number.parseInt(this.fillColor.slice(1), 16), alpha: 0.5 });
         const mask = new Graphics()
             .ellipse(centerX, centerY, radiusX, radiusY)
             .fill({ color: 0xffffff });
         const outline = new Graphics()
             .ellipse(centerX, centerY, radiusX, radiusY)
-            .stroke({ color: 0x000000, width: 2 });
+            .stroke({
+                color: Number.parseInt(this.strokeColor.slice(1), 16),
+                width: this.strokeWidth
+            });
 
         this.shape = BackgroundTexture.addToShape(this.stage, {
             fill,

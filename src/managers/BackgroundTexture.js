@@ -1,18 +1,9 @@
 import { Assets, Container, Sprite } from "pixi.js";
 
-const textureUrls = Object.entries(
-    import.meta.glob("../../textures/*.png", {
-        eager: true,
-        import: "default",
-        query: "?url"
-    })
-)
-    .sort(([pathA], [pathB]) => {
-        const numberA = Number(pathA.match(/(\d+)\.png$/)?.[1]);
-        const numberB = Number(pathB.match(/(\d+)\.png$/)?.[1]);
-        return numberA - numberB;
-    })
-    .map(([, url]) => url);
+const textureUrls = Array.from(
+    { length: 10 },
+    (_, index) => `${import.meta.env.BASE_URL}assets/textures/${index + 1}.png`
+);
 
 class BackgroundTexture {
     static textures = [];

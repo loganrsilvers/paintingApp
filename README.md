@@ -85,10 +85,13 @@ json - sender:tove
 - keyboard shortcuts (ctrl z, ctrl shift z/ ctrl y, ctrl c + v, ctrl x, ctrl d, ctrl p, backspace)
 
 ## week 2: takeaways:
-- added actions/ folder
+![week 2 color](readMeIMGs/week2.png.png)
+- added undo/redo buttons 
+- fill colors are selected from the swatches in `public/assets/colorPallete.js` instead of an unrestricted color input.
 - changed the states to execute actions (((EX:
 HistoryManager.execute(
             new DrawRectAction()
-))))
-- speaking of, added historyManager - has history and undoStack with undo/redo/execute same as the shapeActions. 
-- updated main.js to include HistoryManager.undo + .redo
+)))) /// added actions/ folder (seperating logic from DrawShapeState)
+- can now fill color, change stroke color, and stroke width
+- can download the canvas as png or jpeg or jpg
+- added canvas background imgs 

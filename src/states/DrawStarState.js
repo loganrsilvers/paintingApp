@@ -10,8 +10,9 @@ class DrawStarState {
     lastY = null;
     isDrawing = false;
 
-    constructor(stage) {
+    constructor(stage, colorState) {
         this.stage = stage;
+        this.colorState = colorState;
     }
 
     onPointerDown(position) {
@@ -52,7 +53,10 @@ class DrawStarState {
             new DrawStarAction(
                 this.stage,
                 { x: this.firstX, y: this.firstY },
-                { x: this.lastX, y: this.lastY }
+                { x: this.lastX, y: this.lastY },
+                this.colorState.fillColor,
+                this.colorState.strokeColor,
+                this.colorState.strokeWidth
             )
         );
     }

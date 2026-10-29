@@ -1,10 +1,12 @@
 import { Graphics } from "pixi.js";
 
 class DrawLineAction {
-    constructor(stage, start, end) {
+    constructor(stage, start, end, strokeColor = "#000000", strokeWidth = 2) {
         this.stage = stage;
         this.start = start;
         this.end = end;
+        this.strokeColor = strokeColor;
+        this.strokeWidth = strokeWidth;
         this.shape = null;
     }
 
@@ -17,7 +19,10 @@ class DrawLineAction {
         this.shape = new Graphics()
             .moveTo(this.start.x, this.start.y)
             .lineTo(this.end.x, this.end.y)
-            .stroke({ color: 0x000000, width: 2 });
+            .stroke({
+                color: Number.parseInt(this.strokeColor.slice(1), 16),
+                width: this.strokeWidth
+            });
         this.stage.addChild(this.shape);
     }
 
