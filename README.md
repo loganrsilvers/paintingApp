@@ -85,7 +85,7 @@ json - sender:tove
 - keyboard shortcuts (ctrl z, ctrl shift z/ ctrl y, ctrl c + v, ctrl x, ctrl d, ctrl p, backspace)
 
 ## week 2: takeaways:
-![week 2 color](readMeIMGs/week2.png)
+![week 2 color](readmeIMGs/week2.png)
 - added undo/redo buttons 
 - fill colors are selected from the swatches in `public/assets/colorPallete.js` instead of an unrestricted color input.
 - changed the states to execute actions (((EX:
