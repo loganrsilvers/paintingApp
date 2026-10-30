@@ -60,30 +60,6 @@ json - sender:tove
 - add stroke weight / stroke type 
 - star center is off center a little bit 
 
-*** extra (next week tbd) --------------*** 
-- actions/
-    - ***selecting (when i select i want an outline)***
-        - selecting in Utils AABB for drag and select 
-        - on selectState onPointerDown if pointerMove is <= 1px, grab top element if elements exist at that point
-        - i want the outline to be in front of everything
-        - layersManager (shapes, outline)
-    - deleting
-    - moving 
-    - scaling 
-    - rotating 
-- sideview layer panel where you can group or ungroup selectively or reorder as you wish 
-- pixie.js container to store all shapes and etc (right now the stage is the container)
-    - we will have shapes container / preview selection container / another container for taking things out to group them and then inserting that container back into the hierarchy (on the top)
-*extra extra*
-- brushes in a container of infinate recngles until pointer up 
-- sound effects 
-- stamp feature / stamp tool 
-- fill tool / paint bucket
-- canvas background options
-- export/print/share screen/canvas 
-- duplicate feature
-- keyboard shortcuts (ctrl z, ctrl shift z/ ctrl y, ctrl c + v, ctrl x, ctrl d, ctrl p, backspace)
-
 ## week 2: takeaways:
 ![week 2 color](readmeIMGs/week2.png)
 - added undo/redo buttons 
@@ -95,3 +71,51 @@ HistoryManager.execute(
 - can now fill color, change stroke color, and stroke width
 - can download the canvas as png or jpeg or jpg
 - added canvas background imgs 
+
+### goals / notes 4 week 3: 
+#### catching up on last week::::
+- actions/
+    - ***selecting (when i select i want an outline)***
+        - make new manager SelectManager 
+            - has Selected list and will add and remove shapes to that selected list 
+        - select is action SelectAction + UnSelectAction (if we are in the bounds of the canvas and the selecttool is active and something on the canvas is selected it will unselect.)
+        - wrapper class which will create the selected outline (it is for making the outline only) and adding it onto the selected layer which is in front of everything. whenever you move the selcted shape you also end up moving the selected outline 
+a *wrapper class* is extended functionality that is extended onto an object, it can extend an object or hide from an object  (i.e. we have our shape class with different functions,, the wrapper class we create its shape and we pass the shape into the constructor of our wrapper class, and we are essentially generating another shape with our added parameters.)
+        - selecting in Utils AABB for drag and select 
+        - on selectState onPointerDown if pointerMove is <= 1px, grab top element if elements exist at that point
+        - i want the outline to be in front of everything
+        - layersManager (shapes, outline)
+
+#### for this week in addition ::
+    - deleting
+        - when undoing a delete on a selected shape, it will not only repopulate the shape but also have isSelected be true.  (for multiple shapes or just in general it will go for every item in Selected : delete)
+    - moving 
+        - on pointer down change x + y position while onpointer move or onpointer down until onpointerup in which case it will release or the current xy position for the shape will be that current one. (go for every item in Selected : move)
+    - scaling 
+        - scalex and scaley, scalerate is 0.01, multiply delta in change * scalerate 
+    - rotating 
+        - utility function -> degrees to radians 
+        - extra credit, nice to impliment but not needed
+
+
+
+for later/next week (grouping / layering)
+- sideview layer panel where you can group or ungroup selectively or reorder as you wish 
+- pixie.js container to store all shapes and etc (right now the stage is the container)
+    - we will have shapes container / preview selection container / another container for taking things out to group them and then inserting that container back into the hierarchy (on the top)
+
+
+#### **extra things**
+- brushes in a container of infinate recngles until pointer up 
+- sound effects 
+- stamp feature / stamp tool 
+- fill tool / paint bucket
+- canvas background options
+- export/print/share screen/canvas 
+- duplicate feature
+- cursor changing 
+    - paint brush when shape selected
+    - same icons for the tools on the cursors when tools are selected, 
+- highlight when tool is selected 
+- clear canvas / reset button 
+- keyboard shortcuts (ctrl z, ctrl shift z/ ctrl y, ctrl c + v, ctrl x, ctrl d, ctrl p, backspace)
