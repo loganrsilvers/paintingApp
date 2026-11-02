@@ -12,6 +12,12 @@ class HistoryManager {
         this.undoStack = [];
     }
 
+    recordExecuted(action) {
+        this.#validateAction(action);
+        this.history.push(action);
+        this.undoStack = [];
+    }
+
     undo() {
         const action = this.history[this.history.length - 1];
         if (!action) {

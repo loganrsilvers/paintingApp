@@ -1,5 +1,6 @@
 import { Graphics } from "pixi.js";
 import BackgroundTexture from "../managers/BackgroundTexture.js";
+import { attachShapeStyle } from "../managers/ShapeStyle.js";
 
 class DrawStarAction {
     constructor(
@@ -64,6 +65,15 @@ class DrawStarAction {
             mask,
             outline,
             bounds
+        });
+        attachShapeStyle(this.shape, {
+            fillGraphic: fill,
+            strokeGraphic: outline,
+            fillPath: (graphic) => graphic.poly(points, true),
+            strokePath: (graphic) => graphic.poly(points, true),
+            fillColor: this.fillColor,
+            strokeColor: this.strokeColor,
+            strokeWidth: this.strokeWidth
         });
     }
 

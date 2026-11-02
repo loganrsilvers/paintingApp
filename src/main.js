@@ -1,16 +1,47 @@
-import { Application, Assets, Rectangle, TilingSprite } from "pixi.js";
+import { Application, Assets, Container, Rectangle, TilingSprite } from "pixi.js";
 import ToolsManager from "./managers/ToolsManager.js";
 import InputManager from "./managers/InputManager.js";
 import DrawManager from "./managers/DrawManager.js";
+import SelectManager from "./managers/SelectManager.js";
+import MoveManager from "./managers/MoveManager.js";
+import ScaleManager from "./managers/ScaleManager.js";
+import DeleteManager from "./managers/DeleteManager.js";
+import RotateManager from "./managers/RotateManager.js";
+import ClipboardManager from "./managers/ClipboardManager.js";
 import BackgroundTexture from "./managers/BackgroundTexture.js";
 import HistoryManager from "./managers/HistoryManager.js";
 import PickColorAction from "./actions/PickColorAction.js";
 import PickStrokeColorAction from "./actions/PickStrokeColorAction.js";
 import PickStrokeWidthAction from "./actions/PickStrokeWidthAction.js";
 import SelectCanvasBackgroundAction from "./actions/SelectCanvasBackgroundAction.js";
+import KeyboardShortcuts from "./keyboard-shortcuts/KeyboardShortcuts.js";
 
 import "../style.css";
 import "@fortawesome/fontawesome-free/css/all.min.css";
+
+// const toolCursors = {
+//     select: {
+//         image: `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><path d="M5 2 L5 25 L11 19 L16 29 L20 27 L15 17 L24 17 Z" fill="#000" stroke="#fff" stroke-width="3" stroke-linejoin="round"/><path d="M5 2 L5 25 L11 19 L16 29 L20 27 L15 17 L24 17 Z" fill="#000" stroke="#111" stroke-width="1" stroke-linejoin="round"/></svg>`,
+//         x: 4,
+//         y: 3
+//     },
+//     move: {
+//         image: `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><path d="M16 2 L11 7 H14 V13 H8 V10 L3 15 L8 20 V17 H14 V23 H11 L16 28 L21 23 H18 V17 H24 V20 L29 15 L24 10 V13 H18 V7 H21 Z" fill="#000" stroke="#fff" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/><path d="M16 2 L11 7 H14 V13 H8 V10 L3 15 L8 20 V17 H14 V23 H11 L16 28 L21 23 H18 V17 H24 V20 L29 15 L24 10 V13 H18 V7 H21 Z" fill="#000" stroke="#111" stroke-width="1" stroke-linejoin="round" stroke-linecap="round"/></svg>`,
+//         x: 16,
+//         y: 15
+//     },
+//     scale: {
+//         image: `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><path d="M11 3 H3 V11 L6 8 L12 14 L14 12 L8 6 Z M21 29 H29 V21 L26 24 L20 18 L18 20 L24 26 Z" fill="#000" stroke="#fff" stroke-width="3" stroke-linejoin="round"/><path d="M11 3 H3 V11 L6 8 L12 14 L14 12 L8 6 Z M21 29 H29 V21 L26 24 L20 18 L18 20 L24 26 Z" fill="#000" stroke="#111" stroke-width="1" stroke-linejoin="round"/></svg>`,
+//         x: 16,
+//         y: 16
+//     }
+// };
+
+// function setCanvasCursor(canvas, cursor) {
+//     canvas.style.cursor =
+//         `url("data:image/svg+xml,${encodeURIComponent(cursor.image)}") ` +
+//         `${cursor.x} ${cursor.y}, auto`;
+// }
 
 (async () => {
     // Create a new application
@@ -26,6 +57,16 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
 
     await BackgroundTexture.initialize();
     InputManager.initialize(app);
+
+    const artworkLayer = new Container();
+    const selectionLayer = new Container();
+    app.stage.addChild(artworkLayer, selectionLayer);
+    SelectManager.initialize(artworkLayer, selectionLayer);
+    MoveManager.initialize(SelectManager);
+    ScaleManager.initialize(SelectManager);
+    DeleteManager.initialize(SelectManager);
+    RotateManager.initialize(SelectManager);
+    ClipboardManager.initialize(SelectManager);
 
     const { default: colorPallete } = await import(
         /* @vite-ignore */ `${import.meta.env.BASE_URL}assets/colorPallete.js`
@@ -72,12 +113,12 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
         strokeColor: strokeColorPicker.value,
         strokeWidth: Number(document.getElementById("stroke").value)
     };
-    DrawManager.initialize(app, colorState);
+    DrawManager.initialize(app, colorState, artworkLayer);
 
     fillColorPicker.addEventListener("change", () => {
         if (fillColorPicker.value !== colorState.fillColor) {
             HistoryManager.execute(
-                new PickColorAction(fillColorPicker, colorState)
+                new PickColorAction(fillColorPicker, colorState, SelectManager)
             );
         }
     });
@@ -103,7 +144,7 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
     strokeColorPicker.addEventListener("change", () => {
         if (strokeColorPicker.value !== colorState.strokeColor) {
             HistoryManager.execute(
-                new PickStrokeColorAction(strokeColorPicker, colorState)
+                new PickStrokeColorAction(strokeColorPicker, colorState, SelectManager)
             );
         }
     });
@@ -111,17 +152,21 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
     ToolsManager.addToolGroup("Shapes",["fa-solid","fa-shapes"], [
         ToolsManager.getTool("Ellipse",["fa-regular","fa-circle"], () => {
             DrawManager.selectCircle();
+            app.canvas.style.cursor = "crosshair";
         }),
         ToolsManager.getTool("Rectangle",["fa-regular","fa-square"], () => {
             DrawManager.selectRectangle();
+            app.canvas.style.cursor = "crosshair";
             
         }),
         ToolsManager.getTool("Line",["fa-solid","fa-lines-leaning"], () => {
             DrawManager.selectLine();
+            app.canvas.style.cursor = "crosshair";
 
         }),
         ToolsManager.getTool("Star",["fa-regular","fa-star"], () => {
             DrawManager.selectStar();
+            app.canvas.style.cursor = "crosshair";
 
         })
     ]);
@@ -137,7 +182,7 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
         const strokeWidth = Number(strokeInput.value);
         if (strokeWidth !== colorState.strokeWidth) {
             HistoryManager.execute(
-                new PickStrokeWidthAction(strokeInput, colorState)
+                new PickStrokeWidthAction(strokeInput, colorState, SelectManager)
             );
         }
     });
@@ -147,19 +192,26 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
     ToolsManager.addTool(strokeColorPicker);
     
     ToolsManager.addTool(ToolsManager.getTool("Select Tool",["fa-solid","fa-arrow-pointer"], () => {
-        
+        DrawManager.selectTool();
+        setCanvasCursor(app.canvas, toolCursors.select);
     }));
     
     ToolsManager.addTool(ToolsManager.getTool("Move Tool",["fa-solid","fa-up-down-left-right"], () => {
-        
+        DrawManager.selectMoveTool();
+        setCanvasCursor(app.canvas, toolCursors.move);
     }));
     
     ToolsManager.addTool(ToolsManager.getTool("Scale Tool",["fa-solid","fa-up-right-and-down-left-from-center"], () => {
-        
+        DrawManager.selectScaleTool();
+        setCanvasCursor(app.canvas, toolCursors.scale);
+    }));
+
+    ToolsManager.addTool(ToolsManager.getTool("Rotate Tool",["fa-solid","fa-rotate"], () => {
+        DrawManager.selectRotateTool();
     }));
     
-    ToolsManager.addTool(ToolsManager.getTool("Delete Tool",["fa-solid","fa-trash-can"], () => {        
-        
+    ToolsManager.addTool(ToolsManager.getTool("Delete Tool",["fa-solid","fa-trash-can"], () => {
+        DeleteManager.deleteSelected();
     }));
     
     ToolsManager.addTool(ToolsManager.getTool("Group Tool",["fa-solid","fa-object-group"], () => {        
@@ -190,13 +242,7 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
         downloadButton.setAttribute("aria-expanded", String(isOpen));
     });
 
-    downloadOptions.addEventListener("click", async (event) => {
-        const option = event.target.closest("[data-format]");
-        if (!option) {
-            return;
-        }
-
-        const requestedFormat = option.dataset.format;
+    const downloadCanvas = async (requestedFormat) => {
         const format = requestedFormat === "png" ? "png" : "jpg";
         const filename = `painting-app.${requestedFormat}`;
         downloadOptions.classList.remove("open");
@@ -217,6 +263,16 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
             console.error("Canvas export failed.", error);
             window.alert("Could not download the canvas. Please try again.");
         }
+    };
+
+    downloadOptions.addEventListener("click", async (event) => {
+        const option = event.target.closest("[data-format]");
+        if (!option) {
+            return;
+        }
+
+        const requestedFormat = option.dataset.format;
+        await downloadCanvas(requestedFormat);
     });
 
     document.addEventListener("click", (event) => {
@@ -224,6 +280,13 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
             downloadOptions.classList.remove("open");
             downloadButton.setAttribute("aria-expanded", "false");
         }
+    });
+
+    KeyboardShortcuts.initialize({
+        selectManager: SelectManager,
+        clipboardManager: ClipboardManager,
+        drawManager: DrawManager,
+        downloadPng: () => downloadCanvas("png")
     });
     
     console.log(app);

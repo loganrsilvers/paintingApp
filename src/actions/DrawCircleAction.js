@@ -1,5 +1,6 @@
 import { Graphics } from "pixi.js";
 import BackgroundTexture from "../managers/BackgroundTexture.js";
+import { attachShapeStyle } from "../managers/ShapeStyle.js";
 
 class DrawCircleAction {
     constructor(
@@ -53,6 +54,15 @@ class DrawCircleAction {
             mask,
             outline,
             bounds
+        });
+        attachShapeStyle(this.shape, {
+            fillGraphic: fill,
+            strokeGraphic: outline,
+            fillPath: (graphic) => graphic.ellipse(centerX, centerY, radiusX, radiusY),
+            strokePath: (graphic) => graphic.ellipse(centerX, centerY, radiusX, radiusY),
+            fillColor: this.fillColor,
+            strokeColor: this.strokeColor,
+            strokeWidth: this.strokeWidth
         });
     }
 

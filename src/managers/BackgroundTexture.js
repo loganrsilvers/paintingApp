@@ -26,10 +26,15 @@ class BackgroundTexture {
         }
 
         const shape = new Container();
+        shape.selectionBounds = bounds;
         const texture = this.textures[
             Math.floor(Math.random() * this.textures.length)
         ];
         const overlay = new Sprite(texture);
+        shape.fillGraphic = fill;
+        shape.maskGraphic = mask;
+        shape.overlaySprite = overlay;
+        shape.strokeGraphic = outline;
 
         overlay.position.set(bounds.x, bounds.y);
         overlay.width = bounds.width;
