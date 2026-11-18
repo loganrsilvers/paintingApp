@@ -6,6 +6,7 @@ import SelectManager from "./managers/SelectManager.js";
 import MoveManager from "./managers/MoveManager.js";
 import ScaleManager from "./managers/ScaleManager.js";
 import DeleteManager from "./managers/DeleteManager.js";
+import GroupManager from "./managers/GroupManager.js";
 import RotateManager from "./managers/RotateManager.js";
 import ClipboardManager from "./managers/ClipboardManager.js";
 import BackgroundTexture from "./managers/BackgroundTexture.js";
@@ -65,6 +66,7 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
     MoveManager.initialize(SelectManager);
     ScaleManager.initialize(SelectManager);
     DeleteManager.initialize(SelectManager);
+    GroupManager.initialize(SelectManager);
     RotateManager.initialize(SelectManager);
     ClipboardManager.initialize(SelectManager);
 
@@ -77,6 +79,14 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
             const src = `${import.meta.env.BASE_URL}assets/canvas-backgrounds/${id}.png`;
             const texture = await Assets.load(src);
             return { id, name: `Background ${id}`, src, texture };
+        })
+    );
+    const stamps = await Promise.all(
+        Array.from({ length: 10 }, async (_, index) => {
+            const id = String(index + 1);
+            const src = `${import.meta.env.BASE_URL}assets/stamps/${id}.png`;
+            const texture = await Assets.load(src);
+            return { id, name: `Stamp ${id}`, src, texture };
         })
     );
     const fillColorPicker = ToolsManager.getColorPicker(
@@ -170,6 +180,17 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
 
         })
     ]);
+
+    ToolsManager.addToolGroup(
+        "Stamps",
+        ["fa-solid","fa-stamp"],
+        stamps.map((stamp) =>
+            ToolsManager.getImageTool(stamp.name, stamp.src, () => {
+                DrawManager.selectStamp(stamp);
+                app.canvas.style.cursor = "crosshair";
+            })
+        )
+    );
     
     const strokeInput = document.getElementById("stroke");
     strokeInput.addEventListener("change", () => {
@@ -214,12 +235,12 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
         DeleteManager.deleteSelected();
     }));
     
-    ToolsManager.addTool(ToolsManager.getTool("Group Tool",["fa-solid","fa-object-group"], () => {        
-       
+    ToolsManager.addTool(ToolsManager.getTool("Group Tool",["fa-solid","fa-object-group"], () => {
+        GroupManager.groupSelected();
     }));
     
-    ToolsManager.addTool(ToolsManager.getTool("Ungroup Tool",["fa-regular","fa-object-group"], () => {        
-        
+    ToolsManager.addTool(ToolsManager.getTool("Ungroup Tool",["fa-regular","fa-object-group"], () => {
+        GroupManager.ungroupSelected();
     }));
     
     container.appendChild(app.canvas);

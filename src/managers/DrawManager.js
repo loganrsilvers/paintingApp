@@ -3,6 +3,7 @@ import DrawCircleState from "../states/DrawCircleState.js";
 import DrawRectState from "../states/DrawRectState.js";
 import DrawLineState from "../states/DrawLineState.js";
 import DrawStarState from "../states/DrawStarState.js";
+import DrawStampState from "../states/DrawStampState.js";
 import SelectState from "../states/SelectState.js";
 import SelectManager from "./SelectManager.js";
 import MoveManager from "./MoveManager.js";
@@ -59,6 +60,10 @@ class DrawManager {
 
     selectStar() {
         this.setState(new DrawStarState(this.artworkLayer, this.colorState));
+    }
+
+    selectStamp(stamp) {
+        this.setState(new DrawStampState(this.artworkLayer, stamp));
     }
 
     selectTool() {

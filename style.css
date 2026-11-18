@@ -300,6 +300,16 @@ body {
     display: flex;
 }
 
+.tool-group-popup .image-tool {
+    padding: 4px;
+}
+
+.tool-group-popup .image-tool img {
+    width: 30px;
+    height: 30px;
+    object-fit: contain;
+}
+
 #workspace {
     position: relative;
     flex: 1 1 auto;

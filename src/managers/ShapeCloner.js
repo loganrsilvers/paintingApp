@@ -33,6 +33,14 @@ function cloneDisplayObject(source, clones) {
     copyTransform(source, clone);
     clone.label = source.label;
     clone.eventMode = source.eventMode;
+    if (source.isShapeGroup) {
+        clone.isShapeGroup = true;
+        clone.selectionBounds = { ...source.selectionBounds };
+        clone.shapeGroupChildOffsets = [
+            ...(source.shapeGroupChildOffsets ??
+                source.children.map((_, index) => index))
+        ];
+    }
     clones.set(source, clone);
     return clone;
 }
@@ -51,6 +59,12 @@ class ShapeCloner {
         const clonedShape = cloneDisplayObject(shape, clones);
         restoreMasks(clones);
         clonedShape.selectionBounds = { ...shape.selectionBounds };
+        clonedShape.isShapeGroup = shape.isShapeGroup;
+        if (shape.isShapeGroup) {
+            clonedShape.shapeGroupChildOffsets = clonedShape.children.map(
+                (_, index) => index
+            );
+        }
 
         if (shape.styleConfig) {
             const config = shape.styleConfig;

@@ -26,6 +26,22 @@ class ToolsManager {
         
         return tool;
     }
+
+    getImageTool(title = "", src = "", onClick = () => {}) {
+        const tool = document.createElement("button");
+        tool.type = "button";
+        tool.title = title;
+        tool.classList.add("tool", "image-tool");
+        tool.setAttribute("aria-label", title);
+
+        const image = document.createElement("img");
+        image.src = src;
+        image.alt = "";
+        tool.appendChild(image);
+
+        tool.addEventListener("click", onClick);
+        return tool;
+    }
     
     getColorPicker(title, palette = null, initialColor = "#ffffff") {
         if (palette) {
