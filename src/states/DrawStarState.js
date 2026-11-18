@@ -1,6 +1,11 @@
 import { constrainToSquare } from "./ShapeConstraints.js";
 import DrawStarAction from "../actions/DrawStarAction.js";
+import DrawRadialAction from "../actions/DrawRadialAction.js";
 import HistoryManager from "../managers/HistoryManager.js";
+import {
+    getCenteredPlacement,
+    isClickPlacement
+} from "./ClickPlacement.js";
 
 class DrawStarState {
 
@@ -10,9 +15,10 @@ class DrawStarState {
     lastY = null;
     isDrawing = false;
 
-    constructor(stage, colorState) {
+    constructor(stage, colorState, drawingOptions = { radialEffect: false }) {
         this.stage = stage;
         this.colorState = colorState;
+        this.drawingOptions = drawingOptions;
     }
 
     onPointerDown(position) {
@@ -49,16 +55,35 @@ class DrawStarState {
         this.lastY = endPosition.y;
         this.isDrawing = false;
 
-        HistoryManager.execute(
-            new DrawStarAction(
-                this.stage,
-                { x: this.firstX, y: this.firstY },
-                { x: this.lastX, y: this.lastY },
-                this.colorState.fillColor,
-                this.colorState.strokeColor,
-                this.colorState.strokeWidth
-            )
+        const isClick = isClickPlacement(
+            { x: this.firstX, y: this.firstY },
+            position
         );
+        const { start, end } = isClick
+            ? getCenteredPlacement(position)
+            : {
+                start: { x: this.firstX, y: this.firstY },
+                end: { x: this.lastX, y: this.lastY }
+            };
+        const fillColor = this.drawingOptions.rainbowEnabled
+                ? this.drawingOptions.getRainbowColor()
+            : this.colorState.fillColor;
+        const action = new DrawStarAction(
+            this.stage,
+            start,
+            end,
+            fillColor,
+            this.colorState.strokeColor,
+            this.colorState.strokeWidth
+        );
+        HistoryManager.execute(
+            this.drawingOptions.radialEffect
+                ? new DrawRadialAction(action)
+                : action
+        );
+        if (isClick) {
+            this.drawingOptions.onClickPlacement?.();
+        }
     }
 
 }

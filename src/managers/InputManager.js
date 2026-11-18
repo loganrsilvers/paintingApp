@@ -41,11 +41,22 @@ class InputManager {
             this.#mouseDown = true;
         });
 
-        this.app.stage.on("pointermove", (event) => {
-            this.onPointerMove(event);
+        this.app.stage.on("globalpointermove", (event) => {
+            if (this.#mouseDown) {
+                this.onPointerMove(event);
+            }
         });
 
         this.app.stage.on("pointerup", (event) => {
+            this.onPointerUp(event);
+            this.#mouseDown = false;
+        });
+
+        this.app.stage.on("pointerupoutside", (event) => {
+            if (!this.#mouseDown) {
+                return;
+            }
+
             this.onPointerUp(event);
             this.#mouseDown = false;
         });

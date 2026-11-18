@@ -14,6 +14,7 @@ import HistoryManager from "./managers/HistoryManager.js";
 import PickColorAction from "./actions/PickColorAction.js";
 import PickStrokeColorAction from "./actions/PickStrokeColorAction.js";
 import PickStrokeWidthAction from "./actions/PickStrokeWidthAction.js";
+import RandomizeSelectionColorsAction from "./actions/RandomizeSelectionColorsAction.js";
 import SelectCanvasBackgroundAction from "./actions/SelectCanvasBackgroundAction.js";
 import KeyboardShortcuts from "./keyboard-shortcuts/KeyboardShortcuts.js";
 
@@ -50,6 +51,25 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
 
     // Initialize the application
     const container = document.getElementById("pixi-container");
+    const workspace = document.getElementById("workspace");
+    const resizeCanvasContainer = () => {
+        const size = Math.floor(
+            Math.min(workspace.clientWidth, workspace.clientHeight)
+        );
+        container.style.width = `${size}px`;
+        container.style.height = `${size}px`;
+    };
+    const workspaceResizeObserver = new ResizeObserver(() => {
+        requestAnimationFrame(resizeCanvasContainer);
+    });
+    workspaceResizeObserver.observe(workspace);
+    resizeCanvasContainer();
+
+    const textureId = Math.floor(Math.random() * 10) + 1;
+    document.body.style.setProperty(
+        "--body-texture",
+        `url("${import.meta.env.BASE_URL}assets/textures/${textureId}.png")`
+    );
     
     await app.init({
         background: "#aaaaaa",
@@ -124,6 +144,35 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
         strokeWidth: Number(document.getElementById("stroke").value)
     };
     DrawManager.initialize(app, colorState, artworkLayer);
+    DrawManager.setRainbowPalette(colorPallete);
+    fillColorPicker.setRainbowEnabled(false);
+    strokeColorPicker.setRainbowEnabled(false);
+    const handleRainbowClick = () => {
+        if (SelectManager.Selected.length > 0) {
+            const action = new RandomizeSelectionColorsAction(
+                SelectManager.Selected,
+                colorPallete
+            );
+            if (action.hasTargets) {
+                HistoryManager.execute(action);
+            }
+            return;
+        }
+
+        const enabled = !DrawManager.drawingOptions.rainbowEnabled;
+        DrawManager.setRainbowEnabled(enabled);
+        fillColorPicker.setRainbowEnabled(enabled);
+        strokeColorPicker.setRainbowEnabled(enabled);
+    };
+    fillColorPicker.addEventListener("rainbow", handleRainbowClick);
+    strokeColorPicker.addEventListener("rainbow", handleRainbowClick);
+    const radialEffectToggle = ToolsManager.getCheckboxTool(
+        "Radial effect",
+        "Radial"
+    );
+    radialEffectToggle.querySelector("input").addEventListener("change", (event) => {
+        DrawManager.setRadialEffect(event.currentTarget.checked);
+    });
 
     fillColorPicker.addEventListener("change", () => {
         if (fillColorPicker.value !== colorState.fillColor) {
@@ -181,6 +230,8 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
         })
     ]);
 
+    ToolsManager.addTool(radialEffectToggle);
+
     ToolsManager.addToolGroup(
         "Stamps",
         ["fa-solid","fa-stamp"],
@@ -189,6 +240,30 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
                 DrawManager.selectStamp(stamp);
                 app.canvas.style.cursor = "crosshair";
             })
+        )
+    );
+
+    const asciiBrushes = [
+        { name: "Dots", pattern: "..·.·..····..··..·.·.·...·..···..·..·..·.·..·.··" },
+        { name: "Xs", pattern: "xXxXxXxXxXxXxXxXxXxXx" },
+        { name: "Os", pattern: "oOoOoOoOoOoOoOoOo" },
+        { name: "Binary", pattern: "001001010110100111100101" },
+        { name: "Stars", pattern: "·.✦ ݁˖ · ⊹ ࣪ ˖ · ⋆.˚ ⊹₊⟡ *:・ﾟ✧" },
+        { name: "Dots2", pattern: "⋅.˳˳.⋅ॱ˙˙ॱ⋅.˳˳.⋅ॱ˙˙ॱ⋅.˳˳.⋅⋅.˳˳.⋅ॱ˙˙ॱ⋅.˳˳.⋅ॱ˙" },
+        { name: "Music", pattern: "♩ ♪ ♫ ♬♩ ♪ ♫ ♬♩ ♪ ♫ ♬♩ ♪ ♫ ♬" }
+    ];
+    ToolsManager.addToolGroup(
+        "ASCII Brushes",
+        ["fa-solid", "fa-font"],
+        asciiBrushes.map(({ name, pattern }) =>
+            ToolsManager.getTextTool(
+                `ASCII Brush: ${name}`,
+                Array.from(pattern).slice(0, 4).join(""),
+                () => {
+                    DrawManager.selectAsciiBrush(pattern);
+                    app.canvas.style.cursor = "crosshair";
+                }
+            )
         )
     );
     
@@ -214,7 +289,7 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
     
     ToolsManager.addTool(ToolsManager.getTool("Select Tool",["fa-solid","fa-arrow-pointer"], () => {
         DrawManager.selectTool();
-        setCanvasCursor(app.canvas, toolCursors.select);
+        app.canvas.style.cursor = "default";
     }));
     
     ToolsManager.addTool(ToolsManager.getTool("Move Tool",["fa-solid","fa-up-down-left-right"], () => {
@@ -308,6 +383,30 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
         clipboardManager: ClipboardManager,
         drawManager: DrawManager,
         downloadPng: () => downloadCanvas("png")
+    });
+
+    const toolsToggle = document.getElementById("tools-toggle");
+    const toolPanel = document.getElementById("tool-panel");
+    const closeToolsMenu = () => {
+        toolPanel.classList.remove("open");
+        toolsToggle.setAttribute("aria-expanded", "false");
+    };
+    toolsToggle.addEventListener("click", () => {
+        const isOpen = toolPanel.classList.toggle("open");
+        toolsToggle.setAttribute("aria-expanded", String(isOpen));
+    });
+    document.addEventListener("click", (event) => {
+        if (
+            !toolPanel.contains(event.target) &&
+            !toolsToggle.contains(event.target)
+        ) {
+            closeToolsMenu();
+        }
+    });
+    document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+            closeToolsMenu();
+        }
     });
     
     console.log(app);

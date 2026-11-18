@@ -1,6 +1,8 @@
 import { constrainLineAngle } from "./ShapeConstraints.js";
 import DrawLineAction from "../actions/DrawLineAction.js";
+import DrawRadialAction from "../actions/DrawRadialAction.js";
 import HistoryManager from "../managers/HistoryManager.js";
+import { getRandomSize, isClickPlacement } from "./ClickPlacement.js";
 
 class DrawLineState {
 
@@ -10,9 +12,10 @@ class DrawLineState {
     lastY = null;
     isDrawing = false;
 
-    constructor(stage, colorState) {
+    constructor(stage, colorState, drawingOptions = { radialEffect: false }) {
         this.stage = stage;
         this.colorState = colorState;
+        this.drawingOptions = drawingOptions;
     }
 
     onPointerDown(position) {
@@ -52,15 +55,35 @@ class DrawLineState {
         this.lastY = endPosition.y;
         this.isDrawing = false;
 
-        HistoryManager.execute(
-            new DrawLineAction(
-                this.stage,
-                { x: this.firstX, y: this.firstY },
-                { x: this.lastX, y: this.lastY },
-                this.colorState.strokeColor,
-                this.colorState.strokeWidth
-            )
+        const isClick = isClickPlacement(
+            { x: this.firstX, y: this.firstY },
+            position
         );
+        const size = isClick ? getRandomSize() : 0;
+        const start = isClick
+            ? { x: position.x - size / 2, y: position.y }
+            : { x: this.firstX, y: this.firstY };
+        const end = isClick
+            ? { x: position.x + size / 2, y: position.y }
+            : { x: this.lastX, y: this.lastY };
+        const strokeColor = this.drawingOptions.rainbowEnabled
+            ? this.drawingOptions.getRainbowColor()
+            : this.colorState.strokeColor;
+        const action = new DrawLineAction(
+            this.stage,
+            start,
+            end,
+            strokeColor,
+            this.colorState.strokeWidth
+        );
+        HistoryManager.execute(
+            this.drawingOptions.radialEffect
+                ? new DrawRadialAction(action)
+                : action
+        );
+        if (isClick) {
+            this.drawingOptions.onClickPlacement?.();
+        }
     }
 }
 

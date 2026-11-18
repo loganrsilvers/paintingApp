@@ -1,6 +1,11 @@
 import { constrainToSquare } from "./ShapeConstraints.js";
 import DrawStampAction from "../actions/DrawStampAction.js";
+import DrawRadialAction from "../actions/DrawRadialAction.js";
 import HistoryManager from "../managers/HistoryManager.js";
+import {
+    getCenteredPlacement,
+    isClickPlacement
+} from "./ClickPlacement.js";
 
 class DrawStampState {
     firstX = null;
@@ -9,9 +14,10 @@ class DrawStampState {
     lastY = null;
     isDrawing = false;
 
-    constructor(stage, stamp) {
+    constructor(stage, stamp, drawingOptions = { radialEffect: false }) {
         this.stage = stage;
         this.stamp = stamp;
+        this.drawingOptions = drawingOptions;
     }
 
     onPointerDown(position) {
@@ -52,14 +58,35 @@ class DrawStampState {
         this.lastY = endPosition.y;
         this.isDrawing = false;
 
-        HistoryManager.execute(
-            new DrawStampAction(
-                this.stage,
-                { x: this.firstX, y: this.firstY },
-                { x: this.lastX, y: this.lastY },
-                this.stamp
-            )
+        const isClick = isClickPlacement(
+            { x: this.firstX, y: this.firstY },
+            position
         );
+        const dimensions = this.stamp.texture.orig;
+        const { start, end } = isClick
+            ? getCenteredPlacement(
+                position,
+                dimensions.width,
+                dimensions.height
+            )
+            : {
+                start: { x: this.firstX, y: this.firstY },
+                end: { x: this.lastX, y: this.lastY }
+            };
+        const action = new DrawStampAction(
+            this.stage,
+            start,
+            end,
+            this.stamp
+        );
+        HistoryManager.execute(
+            this.drawingOptions.radialEffect
+                ? new DrawRadialAction(action)
+                : action
+        );
+        if (isClick) {
+            this.drawingOptions.onClickPlacement?.();
+        }
     }
 }
 

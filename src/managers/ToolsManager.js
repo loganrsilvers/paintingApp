@@ -42,6 +42,33 @@ class ToolsManager {
         tool.addEventListener("click", onClick);
         return tool;
     }
+
+    getTextTool(title = "", preview = "", onClick = () => {}) {
+        const tool = document.createElement("button");
+        tool.type = "button";
+        tool.title = title;
+        tool.setAttribute("aria-label", title);
+        tool.classList.add("tool", "text-tool");
+        tool.textContent = preview;
+        tool.addEventListener("click", onClick);
+        return tool;
+    }
+
+    getCheckboxTool(title, label) {
+        const control = document.createElement("label");
+        control.classList.add("checkbox-tool");
+        control.title = title;
+
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.setAttribute("aria-label", title);
+
+        const labelText = document.createElement("span");
+        labelText.textContent = label;
+
+        control.append(checkbox, labelText);
+        return control;
+    }
     
     getColorPicker(title, palette = null, initialColor = "#ffffff") {
         if (palette) {
@@ -182,6 +209,33 @@ class ToolsManager {
         popup.setAttribute("role", "group");
         popup.setAttribute("aria-label", title);
 
+        const rainbowButton = document.createElement("button");
+        rainbowButton.type = "button";
+        rainbowButton.classList.add("palette-rainbow");
+        rainbowButton.setAttribute("aria-label", "Rainbow colors");
+        rainbowButton.setAttribute("aria-pressed", "false");
+        const rainbowColorNames = [
+            "Red 1",
+            "Orange 1",
+            "Yellow 1",
+            "Green 2",
+            "Blue 1",
+            "Purple 1"
+        ];
+        const rainbowColors = rainbowColorNames.map(
+            (name) => palette.find((color) => color.name === name).value
+        );
+        rainbowButton.style.backgroundImage =
+            `linear-gradient(to right, ${rainbowColors.join(", ")})`;
+        rainbowButton.addEventListener("click", () => {
+            popup.classList.remove("open");
+            button.setAttribute("aria-expanded", "false");
+            picker.dispatchEvent(new Event("rainbow"));
+        });
+        picker.setRainbowEnabled = (enabled) => {
+            rainbowButton.setAttribute("aria-pressed", String(enabled));
+        };
+
         const allowedColors = new Set(palette.map(({ value }) => value));
         const swatches = [];
         for (const { name, value } of palette) {
@@ -201,6 +255,7 @@ class ToolsManager {
             });
             popup.appendChild(swatch);
         }
+        popup.appendChild(rainbowButton);
 
         Object.defineProperty(picker, "value", {
             get: () => picker._value,
@@ -259,16 +314,8 @@ class ToolsManager {
         icon.classList.add(...cssClasses);
 
         icon.style.fontSize = "22px";
-        
-        const expandIcon = document.createElement("i");
-        expandIcon.classList.add(
-            "fa-solid",
-            "fa-caret-down",
-            "tool-group-expand"
-        );
 
         button.appendChild(icon);
-        button.appendChild(expandIcon);
 
         const popup = document.createElement("div");
         popup.classList.add("tool-group-popup");

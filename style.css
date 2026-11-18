@@ -10,15 +10,32 @@ body {
     box-sizing: border-box;
 }
 
+:root {
+    --tool-panel-width: clamp(48px, calc(100dvh / 12), 64px);
+    --canvas-size: min(
+        calc(100vw - var(--tool-panel-width) - 32px),
+        calc(100dvh - 48px)
+    );
+    --toolbar-tool-size: clamp(20px, calc((100dvh - 116px) / 14), 44px);
+}
+
 body {
     font-family: Arial, sans-serif;
+    background-color: #000000;
+    background-image:
+        linear-gradient(rgba(0, 0, 0, 0.72), rgba(0, 0, 0, 0.72)),
+        var(--body-texture);
+    background-repeat: no-repeat, repeat;
+    background-size: cover, 256px 256px;
 }
 
 #app {
     display: flex;
     flex-direction: column;
+    align-items: center;
     width: 100%;
     height: 100%;
+    height: 100dvh;
 }
 
 #app-header {
@@ -27,6 +44,8 @@ body {
     justify-content: space-between;
     flex: 0 0 48px;
     min-height: 48px;
+    width: calc(var(--tool-panel-width) + var(--canvas-size));
+    max-width: 100%;
     padding: 0 12px;
     border-bottom: 1px solid #444;
     background-color: #252525;
@@ -38,6 +57,10 @@ body {
     display: flex;
     align-items: center;
     gap: 8px;
+}
+
+#tools-toggle {
+    display: none;
 }
 
 .header-menu-placeholder,
@@ -108,29 +131,33 @@ body {
 }
 
 #app-main {
+    position: relative;
     display: flex;
     flex: 1 1 auto;
+    width: calc(var(--tool-panel-width) + var(--canvas-size));
+    max-width: 100%;
     min-width: 0;
     min-height: 0;
+    margin: 0 auto;
 }
 
 #tool-panel {
     display: flex;
     flex-direction: column;
     align-items: center;
-    flex: 0 0 64px;
-    width: 64px;
-    padding: 8px;
-    gap: 8px;
+    flex: 0 0 var(--tool-panel-width);
+    width: var(--tool-panel-width);
+    padding: 6px;
+    gap: 4px;
     border-right: 1px solid #444;
     background-color: #252525;
 }
 
 .tool {
-    width: 44px;
-    height: 44px;
-    min-width: 44px;
-    min-height: 44px;
+    width: var(--toolbar-tool-size);
+    height: var(--toolbar-tool-size);
+    min-width: var(--toolbar-tool-size);
+    min-height: var(--toolbar-tool-size);
     
     display: flex;
     align-items: center;
@@ -138,6 +165,36 @@ body {
 
     background-color: #3a3a3a;
     border-radius: 6px;
+    cursor: pointer;
+}
+
+.text-tool {
+    padding: 2px;
+    overflow: hidden;
+    color: #ffffff;
+    font-family: monospace;
+    font-size: 11px;
+    white-space: nowrap;
+}
+
+.checkbox-tool {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: var(--toolbar-tool-size);
+    min-height: var(--toolbar-tool-size);
+    gap: 3px;
+    color: #ffffff;
+    font-size: clamp(6px, 1.25vh, 10px);
+    cursor: pointer;
+}
+
+.checkbox-tool input {
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    accent-color: #8ab4f8;
     cursor: pointer;
 }
 
@@ -169,6 +226,28 @@ body {
     border: 1px solid #555555;
     border-radius: 6px;
     z-index: 1000;
+}
+
+.palette-rainbow {
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+    min-height: 28px;
+    padding: 0;
+    border: 1px solid #ffffff66;
+    border-radius: 4px;
+    background-size: 100% 100%;
+    cursor: pointer;
+}
+
+.palette-rainbow[aria-pressed="true"] {
+    border: 2px solid #ffffff;
+    box-shadow: inset 0 0 0 1px #222222;
+}
+
+.palette-rainbow:focus-visible {
+    outline: 2px solid #ffffff;
+    outline-offset: 2px;
 }
 
 .palette-popup.open {
@@ -269,15 +348,6 @@ body {
     position: relative;
 }
 
-.tool-group-expand {
-    position: absolute;
-
-    right: 3px;
-    bottom: 2px;
-
-    font-size: 8px;
-}
-
 .tool-group-popup {
     display: none;
 
@@ -305,26 +375,151 @@ body {
 }
 
 .tool-group-popup .image-tool img {
-    width: 30px;
-    height: 30px;
+    width: min(30px, calc(var(--toolbar-tool-size) - 10px));
+    height: min(30px, calc(var(--toolbar-tool-size) - 10px));
     object-fit: contain;
+}
+
+#tool-panel .tool > i {
+    font-size: clamp(16px, 3.75vh, 30px) !important;
 }
 
 #workspace {
     position: relative;
-    flex: 1 1 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 var(--canvas-size);
+    width: var(--canvas-size);
     min-width: 0;
     min-height: 0;
     overflow: hidden;
-    background-color: #181818;
 }
 
 #pixi-container {
-    position: absolute;
-    inset: 0;
+    position: relative;
+    flex: 0 0 auto;
     overflow: hidden;
 }
 
 #pixi-container canvas {
     display: block;
+    width: 100%;
+    height: 100%;
+}
+
+@media (max-height: 400px) and (min-width: 641px) {
+    :root {
+        --tool-panel-width:
+            calc(var(--toolbar-tool-size) + var(--toolbar-tool-size) + 20px);
+    }
+
+    #tool-panel {
+        display: grid;
+        grid-template-columns: repeat(2, var(--toolbar-tool-size));
+        justify-content: center;
+        align-content: start;
+    }
+}
+
+@media (max-width: 640px) {
+    #app {
+        align-items: stretch;
+        --toolbar-tool-size: 44px;
+    }
+
+    #app-header {
+        flex: 0 0 auto;
+        flex-wrap: wrap;
+        min-height: 48px;
+        height: auto;
+        width: 100%;
+        max-width: none;
+        gap: 6px;
+        padding: 6px 8px;
+    }
+
+    #app-main {
+        width: 100%;
+        max-width: none;
+        margin: 0;
+    }
+
+    #header-menus,
+    #header-actions {
+        gap: 6px;
+    }
+
+    #header-menus label {
+        font-size: 13px;
+    }
+
+    #stroke {
+        width: 56px;
+    }
+
+    #header-actions .header-action-placeholder {
+        min-width: 44px;
+        padding: 0 8px;
+    }
+
+    #tools-toggle {
+        display: flex;
+    }
+
+    #tool-panel {
+        display: none;
+        position: absolute;
+        top: 8px;
+        left: 8px;
+        z-index: 20;
+        grid-template-columns: repeat(4, 44px);
+        justify-content: center;
+        align-content: start;
+        width: min(218px, calc(100vw - 16px));
+        flex-basis: auto;
+        padding: 8px;
+        gap: 8px;
+        overflow: visible;
+        border: 1px solid #555555;
+        border-radius: 8px;
+        box-shadow: 0 4px 16px #00000099;
+    }
+
+    #tool-panel.open {
+        display: grid;
+    }
+
+    .checkbox-tool {
+        width: 44px;
+    }
+
+    #workspace {
+        flex: 1 1 auto;
+        width: auto;
+        min-width: 0;
+        overflow: hidden;
+    }
+
+    .tool-group-popup {
+        top: calc(100% + 6px);
+        left: 0;
+        flex-wrap: wrap;
+        width: min(220px, calc(100vw - 136px));
+    }
+
+    .palette-popup,
+    .image-picker-popup {
+        top: calc(100% + 6px);
+        right: 0;
+        left: auto;
+    }
+
+    .palette-popup {
+        grid-template-columns: repeat(5, 28px);
+    }
+
+    .image-picker-popup {
+        grid-template-columns: repeat(2, 80px);
+    }
 }
