@@ -1,4 +1,4 @@
-# paintingApp
+# [paintingApp](https://loganrsilvers.github.io/paintingApp/)
 node.js painting application
 <img width="950" height="913" alt="image" src="https://github.com/user-attachments/assets/3bb9ed02-b111-40c2-9286-fe4e76e8196d" />
 <img width="1037" height="932" alt="Screenshot 2026-11-20 195636" src="https://github.com/user-attachments/assets/a29dc7cb-4efd-4d5c-ac42-f563acbe6239" />
